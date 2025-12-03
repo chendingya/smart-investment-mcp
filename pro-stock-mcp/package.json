@@ -1,0 +1,31 @@
+{
+  "name": "pro-stock-mcp",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "index.js",
+  "bin": {
+    "pro-stock-mcp": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "stock",
+    "china",
+    "finance"
+  ],
+  "author": "asimov",
+  "license": "ISC",
+  "description": "一个查询中国股市行情的 MCP 服务",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.1",
+    "axios": "^1.13.2",
+    "iconv-lite": "^0.7.0"
+  }
+}
