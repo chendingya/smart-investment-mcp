@@ -7,4 +7,4 @@ RUN pip install -i https://mirrors.aliyun.com/pypi/simple/ --no-cache-dir -r req
 COPY src/ ./src/
 
 EXPOSE 8000
-CMD ["python", "src/server.py"]
+CMD ["fastmcp", "run", "src/server.py", "--transport", "sse", "--host", "0.0.0.0", "--port", "8000"]

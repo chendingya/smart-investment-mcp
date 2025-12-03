@@ -32,7 +32,7 @@ def get_market_overview() -> str:
         resp = requests.get(url, headers=headers, timeout=5)
         
         lines = resp.text.split('\n')
-        result = "【📊 A股大盘实时概览】\n"
+        result = "【A股大盘实时概览】\n"
         
         index_names = {"s_sh000001": "上证指数", "s_sz399001": "深证成指", "s_sz399006": "创业板指"}
         
@@ -162,7 +162,7 @@ def get_trading_depth(symbol: str) -> str:
 
 if __name__ == "__main__":
     # 本地开发调试时：
-    # mcp.run() 
+    mcp.run() 
     
     # 部署给百宝箱时 (配合 ngrok):
-    mcp.run(transport="sse")
+    # mcp.run(transport="sse")

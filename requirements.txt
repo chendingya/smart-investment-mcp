@@ -1,2 +1,4 @@
-requests==2.31.0
-fastmcp==0.1.0
+fastmcp>=0.5.2
+akshare>=1.13.0
+pandas
+uvicorn
