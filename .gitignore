@@ -72,28 +72,5 @@ pytest_cache/
 .mcp/
 *.mcp
 
-# Node.js dependencies
-node_modules/
-
-# Package lock files
-package-lock.json
-yarn.lock
-
-# Compiled binaries
-*.exe
-*.dll
-*.so
-
-# Backup files
-*.bak
-*.backup
-
-# Editor temporary files
-*.~*
-*~
-
-# Log files
-*.log.*
-
-# System files
-desktop.ini
+pro-stock-mcp/node_modules/
+pro-stock-mcp/package-lock.json
