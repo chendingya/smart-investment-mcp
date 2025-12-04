@@ -36,13 +36,53 @@ async function fetchStockData(url) {
   try {
     const response = await axios.get(url, {
       responseType: "arraybuffer", // 关键：以二进制方式接收
-      timeout: 5000,
-      headers: { Referer: "https://finance.sina.com.cn" },
+      timeout: 8000,
+      // 使用更接近浏览器的请求头，降低被目标站点屏蔽的概率
+      headers: {
+        Referer: "https://finance.sina.com.cn",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "*/*",
+        Connection: "keep-alive",
+      },
+      // 我们手动检查状态码以便记录更详细信息
+      validateStatus: null,
     });
+
+    if (response.status === 403) {
+      console.error(`fetchStockData 403 from ${url}`);
+      console.error("response headers:", response.headers);
+      const err = new Error(`请求被拒绝 (HTTP 403)`);
+      err.debug = { url, status: 403, headers: response.headers };
+      throw err;
+    }
+
+    if (response.status >= 400) {
+      console.error(`fetchStockData HTTP ${response.status} from ${url}`);
+      const err = new Error(`HTTP 错误: ${response.status} ${response.statusText}`);
+      err.debug = { url, status: response.status, statusText: response.statusText, headers: response.headers };
+      throw err;
+    }
+
     // 将 GBK 解码为 UTF-8 字符串
     return iconv.decode(response.data, "gbk");
   } catch (error) {
-    throw new Error(`请求失败: ${error.message}`);
+    // 如果是 axios 返回的 response，已经在上面处理过，但还是保底输出日志
+    if (error && error.response) {
+      console.error("fetchStockData error response:", {
+        url,
+        status: error.response.status,
+        headers: error.response.headers,
+      });
+      const err = new Error(`请求失败: HTTP ${error.response.status}`);
+      err.debug = { url, status: error.response.status, headers: error.response.headers };
+      throw err;
+    }
+
+    console.error("fetchStockData error:", error && error.message ? error.message : error);
+    const err = new Error(`请求失败: ${error && error.message ? error.message : String(error)}`);
+    err.debug = { url, message: error && error.message ? error.message : String(error) };
+    throw err;
   }
 }
 
@@ -66,9 +106,15 @@ const server = new Server(
 server.setRequestHandler(InitializeRequestSchema, async (request) => {
   console.error("Initializing ProStockAssistant MCP Server...");
   return {
-    protocolVersion: "2024-12-02",
+    protocolVersion: "2024-11-05",
     capabilities: {
-      tools: {}
+      tools: {
+        listChanged: false
+      }
+    },
+    serverInfo: {
+      name: "ProStockAssistant",
+      version: "1.0.0"
     }
   };
 });
@@ -78,6 +124,7 @@ server.setRequestHandler(InitializeRequestSchema, async (request) => {
 // =======================
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
+  console.error("Listing available tools...");
   return {
     tools: [
       {
@@ -86,6 +133,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         inputSchema: {
           type: "object",
           properties: {},
+          required: [],
         },
       },
       {
@@ -142,6 +190,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   try {
+    console.error(`Executing tool: ${name} with args:`, args);
+    
     switch (name) {
       case "get_market_overview": {
         const url = "http://hq.sinajs.cn/list=s_sh000001,s_sz399001,s_sz399006";
@@ -256,8 +306,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         throw new Error(`未找到工具: ${name}`);
     }
   } catch (error) {
+    // 打印错误及调试信息到 stderr
+    console.error("Tool handler error:", error && error.message ? error.message : error);
+    if (error && error.debug) console.error("Tool handler debug:", error.debug);
+
+    // 如果环境变量 MCP_DEBUG=true，则在返回中包含调试信息（便于云端无法访问主机日志时排查）
+    const includeDebug = process.env.MCP_DEBUG === "true";
+    const debugText = includeDebug && error && error.debug ? `\nDEBUG: ${JSON.stringify(error.debug)}` : "";
+
     return {
-      content: [{ type: "text", text: `工具执行出错: ${error.message}` }],
+      content: [{ type: "text", text: `工具执行出错: ${error.message}${debugText}` }],
       isError: true,
     };
   }
