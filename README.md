@@ -8,6 +8,11 @@
 - 📊 查询个股实时价格及涨跌情况
 - 📉 获取个股基本面指标（市盈率、市净率、总市值）
 - ⚡ 查看股票买卖五档盘口数据
+- 📰 获取股票相关新闻资讯
+- 📊 获取股票历史价格数据和K线数据
+- 📈 获取同行业股票对比分析
+- 🔥 获取热门股票排行榜
+- 📊 获取股票技术指标分析（RSI、MACD、KDJ、BOLL等）
 - 🐳 支持 Docker 部署
 - 🔌 支持 MCP 协议，可与支持该协议的应用集成
 
@@ -20,9 +25,8 @@
 │   ├── get_market_overview.py
 │   └── get_stock_price.py
 ├── pro-stock-mcp/        # Node.js 版本实现
-│   ├── index.js          # 主服务文件
-│   ├── package.json
-│   └── package-lock.json
+│   ├── index.js          # 主服务文件（包含完整的MCP服务和所有工具实现）
+│   └── package.json
 ├── dockerfile            # Docker 构建文件
 ├── requirements.txt      # Python 依赖文件
 └── 记录/                 # 相关文档和截图
@@ -83,12 +87,41 @@ pro-stock-mcp
 2. `get_stock_price` - 查询个股当前价格和涨跌幅
 3. `get_stock_fundamentals` - 获取个股基本面指标（市盈率、市净率、总市值）
 4. `get_trading_depth` - 查看股票买卖五档盘口数据
+5. `get_stock_news` - 获取指定股票的相关新闻资讯
+6. `get_stock_history` - 获取指定日期范围内的历史价格数据
+7. `get_stock_kline` - 获取股票K线数据（日K、周K、月K）
+8. `get_stock_peers` - 获取同行业股票对比分析
+9. `get_hot_stocks` - 获取热门股票排行榜
+10. `get_stock_technical` - 获取股票技术指标分析
 
 ## 技术栈
 
 - Python 版本：使用 [FastMCP](https://github.com/fastai/fastmcp) 框架
 - Node.js 版本：使用 [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/sdk)
 - 数据源：腾讯证券、新浪金融等公开API
+- 技术指标计算：内置RSI、MACD、KDJ、BOLL等技术指标算法实现
+
+## 使用示例
+
+### 查询大盘指数
+```
+get_market_overview
+```
+
+### 查询个股行情
+```
+get_stock_price(symbol="600519")
+```
+
+### 获取技术指标分析
+```
+get_stock_technical(symbol="600519", period="daily", indicators="ma,macd,rsi,kdj,boll")
+```
+
+### 获取同行业股票对比
+```
+get_stock_peers(symbol="600519", limit=10)
+```
 
 ## 部署
 
